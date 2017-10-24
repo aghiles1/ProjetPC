@@ -1,6 +1,4 @@
 #include "matrice.h"
-#include <iostream>
-
 
 int** init(int height, int width,int p){
 	int** matrice_jeu = (int**) malloc(sizeof(int*)*height);

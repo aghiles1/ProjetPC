@@ -9,7 +9,7 @@ FLAGS =-g -ansi -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -D_DEBUG_ -s
 EXE_NAME= main.exe
 
 #can have several ones separated by spaces, only cpp files
-SOURCES = main.cpp matrice.cpp thread1.cpp
+SOURCES = main.cpp matrice.cpp thread_personne.cpp
 
 
 #PATH to extra header used in the project (when using libs not installed in the OS)
