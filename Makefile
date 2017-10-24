@@ -1,13 +1,3 @@
-#=======================================================================
-# Basic C++: makefile example to use as a reminder or as a template
-#-----------------------------------------------------------------------
-# Julien DeAntoni --- No Copyright 2016
-# $Id: convenient Makefile but muist be tuned for templated project 
-#      v0.2 2016/09/06
-#=======================================================================
-
-#only ok for project with no templated classes
-
 #compiler
 COMPILER = g++
 #linker
@@ -19,7 +9,7 @@ FLAGS =-g -ansi -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -D_DEBUG_ -s
 EXE_NAME= main.exe
 
 #can have several ones separated by spaces, only cpp files
-SOURCES = main.cpp affiche.cpp init.cpp thread1.cpp
+SOURCES = main.cpp matrice.cpp thread1.cpp
 
 
 #PATH to extra header used in the project (when using libs not installed in the OS)
