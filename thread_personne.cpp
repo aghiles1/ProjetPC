@@ -6,13 +6,13 @@
     }
 */
 
-void* rien(){
+void *rien(void*){
 	return NULL;
 }
 
 pthread_t* create_threads_personnes(int nb){
 
-	pthread_t* personnes = malloc(sizeof(pthread_t)*nb);
+	pthread_t* personnes = (pthread_t*) malloc(sizeof(pthread_t)*nb);
 	if(personnes == NULL) 
 		std::cerr << "ERREUR CREATION THREADS" << std::endl;
 

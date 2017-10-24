@@ -4,7 +4,7 @@ COMPILER = g++
 LINKER =g++
 
 #options for linker and compiler
-FLAGS =-g -ansi -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -D_DEBUG_ -std=c++11
+FLAGS =-g -ansi -Wall -Wextra -Wold-style-cast -Woverloaded-virtual -D_DEBUG_ -std=c++11 -lpthread
 
 EXE_NAME= main.exe
 
