@@ -39,6 +39,6 @@ void affiche(int** matrice_jeu,int hight,int width);
  * [deplacer est une fonction qui sert a deplacer le personnage sur la matrice est qui les conduit a la sortie. Cette fonction est appelé par tout les thread créer]
  * @param p [un pointeur vers la personne qu'il faut deplacer]
  */
-void deplacer(void* p);
+void *deplacer(void* p);
 
 #endif

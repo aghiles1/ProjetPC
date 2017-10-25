@@ -39,7 +39,7 @@ Per* init(int** matrice_jeu,int p){
 			}
 			personnes[x]->x = rand() % (HEIGHT);
 			personnes[x]->y = rand() % (WIDTH);
-			std::cout << "pos = "<<x<<" x== "<<personnes[x]->x  <<" y== "<<personnes[x]->y << std::endl;	
+			//std::cout << "pos = "<<x<<" x== "<<personnes[x]->x  <<" y== "<<personnes[x]->y << std::endl;	
 			if(*(*(matrice_jeu+personnes[x]->x)+personnes[x]->y) == EMPTY){
 				*(*(matrice_jeu+personnes[x]->x)+personnes[x]->y) = MEN;
 				x++;
@@ -63,7 +63,7 @@ void affiche(int** matrice_jeu,int hight,int width){
 	std::cout << "" << std::endl;
 }
 
-void deplacer(void* p){
+void *deplacer(void* p){
 	Per* personne = (Per*) p;
     int x =(*personne)->x;
     int y =(*personne)->y;
@@ -109,6 +109,7 @@ void deplacer(void* p){
     }
     if(matrice_jeu1[y =(*personne)->x][y =(*personne)->y]=MEN)
     	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;//la personne sort de la matrice
+    return NULL;
 }
 
 

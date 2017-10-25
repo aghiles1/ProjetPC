@@ -7,12 +7,21 @@
 #include <string.h>
 #include "define.h"
 #include "matrice.h"
+#include <time.h>
+    #include "stdlib.h"
+    #include "stdio.h"
+    #include "string.h"
+    #include "sys/times.h"
+    #include "sys/vtimes.h"
+
+void initCPU();
+double getCurrentValue();
 
 int main(int argc, char** argv) {
 
 	int nbp;
 	bool mode, mesure = false;
-	
+	clock_t t1,t2;
 	//vérification des arguments
 	for(int i=1; i<argc; i++){
 		if(strcmp(argv[i], "-p")==0){
@@ -52,13 +61,18 @@ int main(int argc, char** argv) {
 	int nb = (int)pow(2, nbp);
 	//récupérer un tableau de personnes
 	Per* personnes = init(matrice_jeu,nb);
+	initCPU();
+	t1=clock();
 	//récupérer un tableau de PID de threads
 	pthread_t* tid = create_threads_personnes(personnes,nb);
 	//attendre la fin des thread avant que le programme s'arrete
 	for (int i = 0; i < nb; i++)
        pthread_join(tid[i], NULL);
+    t2=clock();
+    double temps = (((double)t2)-((double)t1))/((double)CLOCKS_PER_SEC);
+    std::cout << "time: "  << (int)temps  << " Sec et " << (temps-(int)temps)*1000 << " MiliSec" << "  CPU " << getCurrentValue() << "%" << std::endl;
    	//afficher la matrice
-   	affiche(matrice_jeu,HEIGHT,WIDTH);
+   	//affiche(matrice_jeu,HEIGHT,WIDTH);
    	//suppression de la memoire allouée pour ne pas avoir de fuite de memoire
 	delete[] personnes;
 	delete[] matrice_jeu;
@@ -66,3 +80,49 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+
+
+    static clock_t lastCPU, lastSysCPU, lastUserCPU;
+    static int numProcessors;
+
+    void initCPU(){
+        FILE* file;
+        struct tms timeSample;
+        char line[128];
+
+        lastCPU = times(&timeSample);
+        lastSysCPU = timeSample.tms_stime;
+        lastUserCPU = timeSample.tms_utime;
+
+        file = fopen("/proc/cpuinfo", "r");
+        numProcessors = 0;
+        while(fgets(line, 128, file) != NULL){
+            if (strncmp(line, "processor", 9) == 0) numProcessors++;
+        }
+        fclose(file);
+    }
+
+    double getCurrentValue(){
+        struct tms timeSample;
+        clock_t now;
+        double percent;
+
+        now = times(&timeSample);
+        if (now <= lastCPU || timeSample.tms_stime < lastSysCPU ||
+            timeSample.tms_utime < lastUserCPU){
+            //Overflow detection. Just skip this value.
+            percent = -1.0;
+        }
+        else{
+            percent = (timeSample.tms_stime - lastSysCPU) +
+                (timeSample.tms_utime - lastUserCPU);
+            percent /= (now - lastCPU);
+            percent /= numProcessors;
+            percent *= 100;
+        }
+        lastCPU = now;
+        lastSysCPU = timeSample.tms_stime;
+        lastUserCPU = timeSample.tms_utime;
+
+        return percent;
+    }
