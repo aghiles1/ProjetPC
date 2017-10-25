@@ -1,13 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-
 #include <iostream>
-
 #include <sys/wait.h>
 #include <math.h>
 #include <string.h>
-
 #include "define.h"
 #include "matrice.h"
 
@@ -15,9 +12,8 @@ int main(int argc, char** argv) {
 
 	int nbp;
 	bool mode, mesure = false;
-	/**
-		
-	**/
+	
+	//vérification des arguments
 	for(int i=1; i<argc; i++){
 		if(strcmp(argv[i], "-p")==0){
 			nbp = atoi(argv[++i]);
@@ -38,12 +34,13 @@ int main(int argc, char** argv) {
 			continue;
 		}
 	}
-
+	//création de la matrice du jeu (lignes)
 	int** matrice_jeu = static_cast<int**> (malloc(sizeof(int*)*HEIGHT));
 	if(matrice_jeu == NULL){
 		std::cerr << "ERREUR DE GENERATION DE LA MATRICE" << std::endl;
 		exit(1);
 	}
+	//création de la matrice du jeu (colonnes)
 	for (int i = 0; i < HEIGHT; i++){
 		*(matrice_jeu+i) = static_cast<int*> (malloc(sizeof(int)*WIDTH));
 		if(*(matrice_jeu+i) == NULL){
@@ -51,15 +48,20 @@ int main(int argc, char** argv) {
 			exit(1);
 		}
 	}
-
+	//nombre de personnes
 	int nb = (int)pow(2, nbp);
-
+	//récupérer un tableau de personnes
 	Per* personnes = init(matrice_jeu,nb);
+	//récupérer un tableau de PID de threads
 	pthread_t* tid = create_threads_personnes(personnes,nb);
+	//attendre la fin des thread avant que le programme s'arrete
 	for (int i = 0; i < nb; i++)
        pthread_join(tid[i], NULL);
+   	//afficher la matrice
    	affiche(matrice_jeu,HEIGHT,WIDTH);
+   	//suppression de la memoire allouée pour ne pas avoir de fuite de memoire
 	delete[] personnes;
+	delete[] matrice_jeu;
 
 	return 0;
 }

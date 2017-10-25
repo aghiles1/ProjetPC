@@ -63,36 +63,39 @@ void affiche(int** matrice_jeu,int hight,int width){
 	std::cout << "" << std::endl;
 }
 
-void *deplacer(void* p){
+void deplacer(void* p){
 	Per* personne = (Per*) p;
     int x =(*personne)->x;
     int y =(*personne)->y;
     while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
          x =(*personne)->x;
          y =(*personne)->y;
+         //verrouiller la section critique pour ne pas ecraser des valeurs
         pthread_mutex_lock(&lock);
+        //tant que on peut se déplacer a la diagonal on le fait car c'est le plus rentable
         	if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
         		matrice_jeu1[x-1][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
         		(*personne)->y--; 
         		(*personne)->x--; 
         	}
-        	else
+        	else //si x et y sont plus grand que 0 on avance horizontalement vers la sortie
         		if(x>0 && y>0 && matrice_jeu1[x][y-1]==EMPTY){
         		matrice_jeu1[x][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
         		(*personne)->y--;  
         	}
-        	else if(x>0 && y>0 && matrice_jeu1[x-1][y]==EMPTY){
+        	else //si  si x et y sont plus grand que 0 on avance verticalement vers la sortie
+        		if(x>0 && y>0 && matrice_jeu1[x-1][y]==EMPTY){
         		matrice_jeu1[x-1][y]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
         		(*personne)->x--; 
-        	}else
-        	if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+        	}else //si y == 0 on avance verticalement vers la sortie
+        		if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
         		matrice_jeu1[x-1][y]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
         		(*personne)->x--; 
-        	}else
+        	}else //si y == 0 on avance horizontalement vers la sortie
         	 if (y>0 && matrice_jeu1[x][y-1]==EMPTY)
         	{
         		matrice_jeu1[x][y-1]=MEN;
@@ -100,28 +103,28 @@ void *deplacer(void* p){
         		(*personne)->y--; 
         	}
         	//affiche( matrice_jeu1, HEIGHT,WIDTH);
+        	//on déverrouille le mutex pour que les autres threads puissent deplacer les autres personnes
         pthread_mutex_unlock(&lock);
 
     }
-    pthread_mutex_lock(&lock);
     if(matrice_jeu1[y =(*personne)->x][y =(*personne)->y]=MEN)
-    	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;
-    pthread_mutex_unlock(&lock);
-	return NULL;
+    	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;//la personne sort de la matrice
 }
 
-pthread_t* create_threads_personnes(Per* tab,int nb){
 
+
+pthread_t* create_threads_personnes(Per* tab,int nb){
+	//création d'un tableau pour les pid des threads
 	pthread_t* personnes = (pthread_t*) malloc(sizeof(pthread_t)*nb);
 	if(personnes == NULL) 
 		std::cerr << "ERREUR CREATION THREADS" << std::endl;
-
+	//initialiser le mutex
     if (pthread_mutex_init(&lock, NULL) != 0)
     {
         std::cerr<<"\n mutex init failed\n"<<std::endl;
         exit(1);
     }
-
+    //création des threads pour chaque personne
 	for(int i=0; i<nb; i++)
 		pthread_create(&personnes[i], NULL, deplacer, &(tab[i]));
 	return personnes;
