@@ -1,6 +1,6 @@
 #include "matrice.h"
 #include "define.h"
-
+#include <cstdlib>
 pthread_mutex_t lock;
 int** matrice_jeu1;
 
@@ -52,15 +52,18 @@ Per* init(int** matrice_jeu,int p){
 }
 
 void affiche(int** matrice_jeu,int hight,int width){
+	system("clear");
 	for (int i = 0; i < hight-1; ++i){
 		for (int j = 0; j < width-1; ++j){
 			std::cout << matrice_jeu[i][j];
+			fflush(stdin);
 		}
 		std::cout << "" << std::endl;
 	}
+	std::cout << "" << std::endl;
 }
 
-void *rien(void* p){
+void *deplacer(void* p){
 	Per* personne = (Per*) p;
     int x =(*personne)->x;
     int y =(*personne)->y;
@@ -71,37 +74,39 @@ void *rien(void* p){
         	if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
         		matrice_jeu1[x-1][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y -=1; 
-        		(*personne)->x -=1; 
+        		(*personne)->y--; 
+        		(*personne)->x--; 
         	}
         	else
         		if(x>0 && y>0 && matrice_jeu1[x][y-1]==EMPTY){
         		matrice_jeu1[x][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y -=1;  
+        		(*personne)->y--;  
         	}
         	else if(x>0 && y>0 && matrice_jeu1[x-1][y]==EMPTY){
         		matrice_jeu1[x-1][y]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->x -=1; 
+        		(*personne)->x--; 
         	}else
-        	if(x>0  && matrice_jeu1[x-1][y]==EMPTY){
+        	if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
         		matrice_jeu1[x-1][y]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->x -=1; 
+        		(*personne)->x--; 
         	}else
-        	 if (y>0)
+        	 if (y>0 && matrice_jeu1[x][y-1]==EMPTY)
         	{
         		matrice_jeu1[x][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y -=1; 
+        		(*personne)->y--; 
         	}
-        	affiche(matrice_jeu1,HEIGHT,WIDTH);
-        	std::cout << "x=== " << x << "  y = " <<y << std::endl;	
+        	//affiche( matrice_jeu1, HEIGHT,WIDTH);
         pthread_mutex_unlock(&lock);
 
     }
-    matrice_jeu1[x][y]=EMPTY;
+    pthread_mutex_lock(&lock);
+    if(matrice_jeu1[y =(*personne)->x][y =(*personne)->y]=MEN)
+    	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;
+    pthread_mutex_unlock(&lock);
 	return NULL;
 }
 
@@ -118,6 +123,6 @@ pthread_t* create_threads_personnes(Per* tab,int nb){
     }
 
 	for(int i=0; i<nb; i++)
-		pthread_create(&personnes[i], NULL, rien, &(tab[i]));
+		pthread_create(&personnes[i], NULL, deplacer, &(tab[i]));
 	return personnes;
 }

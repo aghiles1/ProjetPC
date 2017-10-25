@@ -15,7 +15,9 @@ int main(int argc, char** argv) {
 
 	int nbp;
 	bool mode, mesure = false;
-
+	/**
+		
+	**/
 	for(int i=1; i<argc; i++){
 		if(strcmp(argv[i], "-p")==0){
 			nbp = atoi(argv[++i]);
@@ -53,9 +55,10 @@ int main(int argc, char** argv) {
 	int nb = (int)pow(2, nbp);
 
 	Per* personnes = init(matrice_jeu,nb);
-	create_threads_personnes(personnes,nb);
-	affiche(matrice_jeu,HEIGHT,WIDTH);
-	wait(NULL);
+	pthread_t* tid = create_threads_personnes(personnes,nb);
+	for (int i = 0; i < nb; i++)
+       pthread_join(tid[i], NULL);
+   	affiche(matrice_jeu,HEIGHT,WIDTH);
 	delete[] personnes;
 
 	return 0;
