@@ -1,14 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "main.h"
-#include "matrice.h"
-#include "thread_personne.h"
+
 #include <iostream>
 
+#include <sys/wait.h>
 #include <math.h>
 #include <string.h>
 
+#include "define.h"
+#include "matrice.h"
 
 int main(int argc, char** argv) {
 
@@ -36,11 +37,27 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	int** matrice_jeu = static_cast<int**> (malloc(sizeof(int*)*HEIGHT));
+	if(matrice_jeu == NULL){
+		std::cerr << "ERREUR DE GENERATION DE LA MATRICE" << std::endl;
+		exit(1);
+	}
+	for (int i = 0; i < HEIGHT; i++){
+		*(matrice_jeu+i) = static_cast<int*> (malloc(sizeof(int)*WIDTH));
+		if(*(matrice_jeu+i) == NULL){
+			std::cerr << "ERREUR DE GENERATION DE LA MATRICE" << std::endl;
+			exit(1);
+		}
+	}
+
 	int nb = (int)pow(2, nbp);
 
-	int** matrice_jeu = init(HEIGHT, WIDTH, nb);
+	Per* personnes = init(matrice_jeu,nb);
+	create_threads_personnes(personnes,nb);
 	affiche(matrice_jeu,HEIGHT,WIDTH);
-	return 0;
+	wait(NULL);
+	delete[] personnes;
 
+	return 0;
 }
 
