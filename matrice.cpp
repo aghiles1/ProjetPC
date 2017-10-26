@@ -71,7 +71,6 @@ void *deplacer(void* p){
     int y =(*personne)->y;
 	double dist;
 	double sinA;
-	int choix;
     while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
          x =(*personne)->x;
          y =(*personne)->y;
@@ -81,25 +80,38 @@ void *deplacer(void* p){
 
          //verrouiller la section critique pour ne pas ecraser des valeurs
         pthread_mutex_lock(&lock);
-        //tant que on peut se déplacer a la diagonal on le fait car c'est le plus rentable
-		if(sinA>=sin(M_PI/((double)8)) && sinA<=sin((3*M_PI)/((double)8))){ // ALGO PAS FINI... TODO
+        // azimuth
+		if(sinA>=sin(M_PI/((double)8)) && sinA<=sin((3*M_PI)/((double)8))){
 			if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->y--; 
 				(*personne)->x--; 
 			}
-			else //si x et y sont plus grand que 0 on avance horizontalement vers la sortie
-				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
-				matrice_jeu1[x][y-1]=MEN;
-				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--;  
-			}
-			else //si  si x et y sont plus grand que 0 on avance verticalement vers la sortie
+			else if(sinA<sin(M_PI/((double)4))){
 				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
-				matrice_jeu1[x-1][y]=MEN;
-				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->x--; 
+					matrice_jeu1[x-1][y]=MEN;
+					matrice_jeu1[x][y]=EMPTY;
+					(*personne)->x--; 
+			
+				}
+				else if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+					matrice_jeu1[x][y-1]=MEN;
+					matrice_jeu1[x][y]=EMPTY;
+					(*personne)->y--;  
+				}
+			}
+			else {
+				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+					matrice_jeu1[x][y-1]=MEN;
+					matrice_jeu1[x][y]=EMPTY;
+					(*personne)->y--;  
+				}
+				else if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+					matrice_jeu1[x-1][y]=MEN;
+					matrice_jeu1[x][y]=EMPTY;
+					(*personne)->x--; 
+				}
 			}
 		}
 		else if(sinA<sin(M_PI/((double)8))){
@@ -109,15 +121,13 @@ void *deplacer(void* p){
 				(*personne)->x--; 
 			
 			}
-			else
-				if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
+			else if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->y--; 
 				(*personne)->x--; 
 			}
-			else 
-				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+			else if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
 				matrice_jeu1[x][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->y--;  
@@ -131,56 +141,18 @@ void *deplacer(void* p){
 			
 			
 			}
-			else
-				if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
+			else if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->y--; 
 				(*personne)->x--; 
 			}
-			else
-				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+			else if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 				matrice_jeu1[x-1][y]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->x--;  
 			}
 		}
-			
-
-
-
-
-		/*  OBSOLETE, ON UTILISE AZIMUTH MTN, NE PAS SUPPRIMER LE CODE POUR SE RAPPELER DE CETTE METHODE SVP
-        	if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
-        		matrice_jeu1[x-1][y-1]=MEN;
-        		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y--; 
-        		(*personne)->x--; 
-        	}
-        	else //si x et y sont plus grand que 0 on avance horizontalement vers la sortie
-        		if(x>0 && y>0 && matrice_jeu1[x][y-1]==EMPTY){
-        		matrice_jeu1[x][y-1]=MEN;
-        		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y--;  
-        	}
-        	else //si  si x et y sont plus grand que 0 on avance verticalement vers la sortie
-        		if(x>0 && y>0 && matrice_jeu1[x-1][y]==EMPTY){
-        		matrice_jeu1[x-1][y]=MEN;
-        		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->x--; 
-        	}else //si y == 0 on avance verticalement vers la sortie
-        		if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
-        		matrice_jeu1[x-1][y]=MEN;
-        		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->x--; 
-        	}else //si y == 0 on avance horizontalement vers la sortie
-        	 if (y>0 && matrice_jeu1[x][y-1]==EMPTY)
-        	{
-        		matrice_jeu1[x][y-1]=MEN;
-        		matrice_jeu1[x][y]=EMPTY;
-        		(*personne)->y--; 
-        	}*/
-        	//affiche( matrice_jeu1, HEIGHT,WIDTH);
         	//on déverrouille le mutex pour que les autres threads puissent deplacer les autres personnes
         pthread_mutex_unlock(&lock);
 
