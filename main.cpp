@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
 	int nbp;
 	bool mode, mesure = false;
 	clock_t t1,t2;
+	struct tms time1,time2;
 	//vérification des arguments
 	if (argc == 1)
 	{
@@ -75,6 +76,7 @@ int main(int argc, char** argv) {
 		}
 		long double tab_mesures[5] = {};
 		double tab_temps[5] = {};
+		double tab_tempsRep[5] = {};
 
 		int nb = (int)pow(2, nbp);
 		int it = (mesure) ? 5 : 1;
@@ -84,6 +86,7 @@ int main(int argc, char** argv) {
 			//récupérer un tableau de PID de threads
 			initCPU();
 			t1=clock();
+			times(&time1);
 			create_threads_personnes(personnes,nb,tid);
 			//attendre la fin des thread avant que le programme s'arrete
 			for (int i = 0; i < nb; i++){
@@ -91,8 +94,10 @@ int main(int argc, char** argv) {
 					printf("bug_join\n");
 			};
 			t2=clock();
+			times(&time2);
 		    tab_mesures[exec] = getCurrentValue();
 		    tab_temps[exec] = (((double)t2)-((double)t1))/((double)CLOCKS_PER_SEC);
+		    tab_tempsRep[exec] = (((double)time2.tms_stime)-((double)time1.tms_stime))/((double)CLOCKS_PER_SEC);
 		}
 		if(mesure){
 			bool trie = false;
@@ -107,11 +112,14 @@ int main(int argc, char** argv) {
 						long double tmp2 = tab_mesures[z];
 						tab_mesures[z] = tab_mesures[z+1];
 						tab_mesures[z+1] = tmp2;
+						double tmp3 = tab_tempsRep[z];
+						tab_tempsRep[z] = tab_tempsRep[z+1];
+						tab_tempsRep[z+1] = tmp3;
 					}
 				}
 				taille--;
 			}
-			std::cout << "MESURES MOYENNES = time: " << (tab_temps[1]+tab_temps[2]+tab_temps[3])/((long)3)*1000 << " MiliSec" << "  CPU " << (tab_mesures[1]+tab_mesures[2]+tab_mesures[3])/((long double)3) << "%" << std::endl;
+			std::cout << "MESURES MOYENNES : \n\t temps CPU consommé: " << (tab_temps[1]+tab_temps[2]+tab_temps[3])/((long)3)*1000 << " MiliSec  \n\t temps de réponse: "<< (tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/((long)3)*1000 <<  " MiliSec \n\t" << " CPU " << (tab_mesures[1]+tab_mesures[2]+tab_mesures[3])/((long double)3) << "%" << std::endl;
 		}
 	}
 	else if(mode == T1_MOD){
@@ -143,7 +151,7 @@ int main(int argc, char** argv) {
         if (now <= lastCPU || timeSample.tms_stime < lastSysCPU ||
             timeSample.tms_utime < lastUserCPU){
             //Overflow detection. Just skip this value.
-            percent = -1.0;
+            percent = 0.0;
         }
         else{
             percent = (timeSample.tms_stime - lastSysCPU) +
