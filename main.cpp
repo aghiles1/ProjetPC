@@ -59,7 +59,6 @@ int main(int argc, char** argv) {
 	Per* personnes = static_cast<Per*> (malloc(sizeof(Per)*(int)pow(2, nbp)));
 
 	if(mode == T0_MOD){
-		int tab_mesures[5] = {};
 		//création de la matrice du jeu (lignes)
 		int** matrice_jeu = static_cast<int**> (malloc(sizeof(int*)*HEIGHT));
 		if(matrice_jeu == NULL){
@@ -74,7 +73,9 @@ int main(int argc, char** argv) {
 				exit(1);
 			}
 		}
-		//nombre de personnes
+		long double tab_mesures[5] = {};
+		double tab_temps[5] = {};
+
 		int nb = (int)pow(2, nbp);
 		int it = (mesure) ? 5 : 1;
 		for(int exec = 0; exec < it; exec++){
@@ -90,10 +91,28 @@ int main(int argc, char** argv) {
 					printf("bug_join\n");
 			};
 			t2=clock();
-		    double temps = (((double)t2)-((double)t1))/((double)CLOCKS_PER_SEC);
-		    std::cout << "time: "  << (int)temps  << " Sec et " << (temps-(int)temps)*1000 << " MiliSec" << "  CPU " << getCurrentValue() << "%" << std::endl;
+		    tab_mesures[exec] = getCurrentValue();
+		    tab_temps[exec] = (((double)t2)-((double)t1))/((double)CLOCKS_PER_SEC);
 		}
-		std::cout << "Mesure : MOYENNE DES MESURES" << std::endl;
+		if(mesure){
+			bool trie = false;
+			int taille = 5;
+			while(!trie){
+				trie = true;
+				for(int z=0 ; z < taille-1 ; z++){
+					if(tab_temps[z] > tab_temps[z+1]){
+						double tmp = tab_temps[z];
+						tab_temps[z] = tab_temps[z+1];
+						tab_temps[z+1] = tmp;
+						long double tmp2 = tab_mesures[z];
+						tab_mesures[z] = tab_mesures[z+1];
+						tab_mesures[z+1] = tmp2;
+					}
+				}
+				taille--;
+			}
+			std::cout << "MESURES MOYENNES = time: " << (tab_temps[1]+tab_temps[2]+tab_temps[3])/((long)3)*1000 << " MiliSec" << "  CPU " << (tab_mesures[1]+tab_mesures[2]+tab_mesures[3])/((long double)3) << "%" << std::endl;
+		}
 	}
 	else if(mode == T1_MOD){
 		std::cout << "Fonction non implémentée..." << std::endl;
