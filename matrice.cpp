@@ -1,6 +1,8 @@
 #include "matrice.h"
 #include "define.h"
+#include <math.h>
 #include <cstdlib>
+
 pthread_mutex_t lock;
 int** matrice_jeu1;
 
@@ -67,12 +69,88 @@ void *deplacer(void* p){
 	Per* personne = (Per*) p;
     int x =(*personne)->x;
     int y =(*personne)->y;
+	double dist;
+	double sinA;
+	int choix;
     while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
          x =(*personne)->x;
          y =(*personne)->y;
+
+	dist = sqrt(x+y);
+	sinA = ((double)y)/dist;
+
          //verrouiller la section critique pour ne pas ecraser des valeurs
         pthread_mutex_lock(&lock);
         //tant que on peut se déplacer a la diagonal on le fait car c'est le plus rentable
+		if(sinA>=sin(M_PI/((double)8)) && sinA<=sin((3*M_PI)/((double)8))){ // ALGO PAS FINI... TODO
+			if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
+				matrice_jeu1[x-1][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--; 
+				(*personne)->x--; 
+			}
+			else //si x et y sont plus grand que 0 on avance horizontalement vers la sortie
+				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+				matrice_jeu1[x][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--;  
+			}
+			else //si  si x et y sont plus grand que 0 on avance verticalement vers la sortie
+				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+				matrice_jeu1[x-1][y]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->x--; 
+			}
+		}
+		else if(sinA<sin(M_PI/((double)8))){
+			if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+				matrice_jeu1[x-1][y]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->x--; 
+			
+			}
+			else
+				if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
+				matrice_jeu1[x-1][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--; 
+				(*personne)->x--; 
+			}
+			else 
+				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+				matrice_jeu1[x][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--;  
+			}
+		}
+		else{
+			if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
+				matrice_jeu1[x][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--; 
+			
+			
+			}
+			else
+				if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
+				matrice_jeu1[x-1][y-1]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->y--; 
+				(*personne)->x--; 
+			}
+			else
+				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
+				matrice_jeu1[x-1][y]=MEN;
+				matrice_jeu1[x][y]=EMPTY;
+				(*personne)->x--;  
+			}
+		}
+			
+
+
+
+
+		/*  OBSOLETE, ON UTILISE AZIMUTH MTN, NE PAS SUPPRIMER LE CODE POUR SE RAPPELER DE CETTE METHODE SVP
         	if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
         		matrice_jeu1[x-1][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
@@ -101,7 +179,7 @@ void *deplacer(void* p){
         		matrice_jeu1[x][y-1]=MEN;
         		matrice_jeu1[x][y]=EMPTY;
         		(*personne)->y--; 
-        	}
+        	}*/
         	//affiche( matrice_jeu1, HEIGHT,WIDTH);
         	//on déverrouille le mutex pour que les autres threads puissent deplacer les autres personnes
         pthread_mutex_unlock(&lock);
@@ -117,12 +195,13 @@ void *deplacer(void* p){
 pthread_t* create_threads_personnes(Per* tab,int nb){
 	//création d'un tableau pour les pid des threads
 	pthread_t* personnes = (pthread_t*) malloc(sizeof(pthread_t)*nb);
-	if(personnes == NULL) 
+	if(personnes == NULL){
 		std::cerr << "ERREUR CREATION THREADS" << std::endl;
+		exit(1);
+	}
 	//initialiser le mutex
-    if (pthread_mutex_init(&lock, NULL) != 0)
-    {
-        std::cerr<<"\n mutex init failed\n"<<std::endl;
+    if (pthread_mutex_init(&lock, NULL) != 0){
+        std::cerr << "ERREUR INITIALISATION MUTEX" << std::endl;
         exit(1);
     }
     //création des threads pour chaque personne

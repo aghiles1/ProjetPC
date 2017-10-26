@@ -8,9 +8,7 @@
 #include "define.h"
 #include "matrice.h"
 #include <time.h>
-    #include "stdlib.h"
-    #include "stdio.h"
-    #include "string.h"
+
     #include "sys/times.h"
     #include "sys/vtimes.h"
 
@@ -26,8 +24,10 @@ int main(int argc, char** argv) {
 	for(int i=1; i<argc; i++){
 		if(strcmp(argv[i], "-p")==0){
 			nbp = atoi(argv[++i]);
-			if(nbp > 9 || nbp < 0);
+			if(nbp > 9 || nbp < 0){
 				std::cerr << "ERREUR PARAMETRE -p [0-9] EN DEHORS DE LA PLAGE" << std::endl;
+				exit(1);
+			}
 			continue;
 		}
 		if(strcmp(argv[i], "-t0")==0){
