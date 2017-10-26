@@ -18,23 +18,22 @@
 void initCPU();
 long double getCurrentValue();
 
-#define T0_MOD false
-#define T1_MOD true
+#define UNDEFINED_MOD -1
+#define T0_MOD 0
+#define T1_MOD 1
 
 int main(int argc, char** argv) {
 
-	int nbp;
-	bool mode, mesure = false;
+	int nbp = -1, mode = UNDEFINED_MOD;
+	int mesure = false;
 	clock_t t1,t2;
 	//vérification des arguments
-	if (argc == 1)
-	{
-		/* prteger la ligne d'argument fusion des mesures  */
-		//TODO
-	}
 	for(int i=1; i<argc; i++){
 		if(strcmp(argv[i], "-p")==0){
-			nbp = atoi(argv[++i]);
+			i++;
+			if(i >= argc)
+				break;
+			nbp = atoi(argv[i]);
 			if(nbp > 9 || nbp < 0){
 				std::cerr << "ERREUR PARAMETRE -p [0-9] EN DEHORS DE LA PLAGE" << std::endl;
 				exit(1);
@@ -53,6 +52,14 @@ int main(int argc, char** argv) {
 			mesure = true;
 			continue;
 		}
+	}
+	if (nbp < 0){
+		std::cerr << "Argument -p suivi de [0-9] non présent ou en dehors de la plage de données acceptée." << std::endl;
+		exit(1);
+	}
+	if (mode == UNDEFINED_MOD){
+		std::cerr << "Aucun mode choisi ! (-t[01]).s" << std::endl;
+		exit(1);
 	}
 
 	pthread_t* tid = (pthread_t*) malloc(sizeof(pthread_t)*(int)pow(2, nbp));
