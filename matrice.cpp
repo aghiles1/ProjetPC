@@ -6,9 +6,7 @@
 pthread_mutex_t lock;
 int** matrice_jeu1;
 
-Per* init(int** matrice_jeu,int p){
-		
-		Per* personnes = static_cast<Per*> (malloc(sizeof(Per)*p));
+void init(int** matrice_jeu,int p,Per* personnes){
 		
 		for (int i = 40, i1 = 80, i2=10, i3=50, i4=35; i <= 60 || i1 <= 110 || i2<=30 || i3<=90 || i4<=45 ; i++,i1++,i2++,i3++,i4++)
 		{
@@ -49,8 +47,6 @@ Per* init(int** matrice_jeu,int p){
 			
 		}
 		matrice_jeu1 =matrice_jeu; 
-
-	return personnes;
 }
 
 void affiche(int** matrice_jeu,int hight,int width){
@@ -159,14 +155,16 @@ void *deplacer(void* p){
     }
     if(matrice_jeu1[y =(*personne)->x][y =(*personne)->y]=MEN)
     	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;//la personne sort de la matrice
+pthread_mutex_lock(&lock);
+affiche(matrice_jeu1,128,512);
+pthread_mutex_unlock(&lock);
     return NULL;
 }
 
 
 
-pthread_t* create_threads_personnes(Per* tab,int nb){
+void create_threads_personnes(Per* tab,int nb,pthread_t* personnes){
 	//création d'un tableau pour les pid des threads
-	pthread_t* personnes = (pthread_t*) malloc(sizeof(pthread_t)*nb);
 	if(personnes == NULL){
 		std::cerr << "ERREUR CREATION THREADS" << std::endl;
 		exit(1);
@@ -177,7 +175,10 @@ pthread_t* create_threads_personnes(Per* tab,int nb){
         exit(1);
     }
     //création des threads pour chaque personne
-	for(int i=0; i<nb; i++)
-		pthread_create(&personnes[i], NULL, deplacer, &(tab[i]));
-	return personnes;
+	for(int i=0; i<nb; i++){
+		int p= pthread_create(&personnes[i], NULL, deplacer, &(tab[i]));
+		if(p == EPERM || p== EAGAIN || p==EINVAL)
+			printf("bug_create\n");
+	}
+	
 }
