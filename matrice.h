@@ -20,7 +20,7 @@ typedef Personne* Per;
  * @param  nb  [le nombre de personnes présente sur la matrice]
  * @return     [les PID de chaque thread qui vont servir pour les attendre jusqua la fin du main]
  */
-pthread_t* create_threads_personnes(Per* tab,int nb);
+void create_threads_personnes(Per* tab,int nb, pthread_t* personnes);
 
 /**
  * [init la fonction init initialise la matrice du jeu qui représente le terrain. Les personnes sont généré aléatoirement.]
@@ -28,7 +28,7 @@ pthread_t* create_threads_personnes(Per* tab,int nb);
  * @param  p           [le nombre de personnes présente sur la matrice]
  * @return             [tableau de pointeurs vers personnes]
  */
-Per* init(int** matrice_jeu,int p);
+void init(int** matrice_jeu,int p,Per* personnes);
 
 /**
  * [affiche affiche la matrice]
