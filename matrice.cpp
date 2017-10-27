@@ -62,7 +62,7 @@ void affiche(int** matrice_jeu,int hight,int width){
 }
 
 void *deplacer(void* p){
-	Per* personne = (Per*) p;
+	Per* personne = static_cast<Per*> (p);
     int x =(*personne)->x;
     int y =(*personne)->y;
 	double dist;
@@ -72,19 +72,19 @@ void *deplacer(void* p){
          y =(*personne)->y;
 
 	dist = sqrt(x+y);
-	sinA = ((double)y)/dist;
+	sinA = (static_cast<double>(y))/dist;
 
          //verrouiller la section critique pour ne pas ecraser des valeurs
         pthread_mutex_lock(&lock);
         // azimuth
-		if(sinA>=sin(M_PI/((double)8)) && sinA<=sin((3*M_PI)/((double)8))){
+		if(sinA>=sin(M_PI/(8.0)) && sinA<=sin((3*M_PI)/(8.0))){
 			if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
 				(*personne)->y--; 
 				(*personne)->x--; 
 			}
-			else if(sinA<sin(M_PI/((double)4))){
+			else if(sinA<sin(M_PI/(4.0))){
 				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 					matrice_jeu1[x-1][y]=MEN;
 					matrice_jeu1[x][y]=EMPTY;
@@ -110,7 +110,7 @@ void *deplacer(void* p){
 				}
 			}
 		}
-		else if(sinA<sin(M_PI/((double)8))){
+		else if(sinA<sin(M_PI/(8.0))){
 			if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 				matrice_jeu1[x-1][y]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
@@ -153,8 +153,8 @@ void *deplacer(void* p){
         pthread_mutex_unlock(&lock);
 
     }
-    if(matrice_jeu1[y =(*personne)->x][y =(*personne)->y]=MEN)
-    	matrice_jeu1[x =(*personne)->x][y =(*personne)->y]=EMPTY;//la personne sort de la matrice
+    if(matrice_jeu1[((*personne)->x)][((*personne)->y)] == MEN)
+    	matrice_jeu1[((*personne)->x)][((*personne)->y)]=EMPTY;//la personne sort de la matrice
 // pthread_mutex_lock(&lock);
 // affiche(matrice_jeu1,128,512);
 // pthread_mutex_unlock(&lock);

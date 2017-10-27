@@ -26,7 +26,6 @@ int main(int argc, char** argv) {
 
 	int nbp = -1, mode = UNDEFINED_MOD;
 	int mesure = false;
-	clock_t t1,t2;
 	struct tms time1,time2;
 	//vérification des arguments
 	for(int i=1; i<argc; i++){
@@ -63,7 +62,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	pthread_t* tid = (pthread_t*) malloc(sizeof(pthread_t)*(int)pow(2, nbp));
+	pthread_t* tid = static_cast<pthread_t*> (malloc(sizeof(pthread_t)*(int)pow(2, nbp)));
 	Per* personnes = static_cast<Per*> (malloc(sizeof(Per)*(int)pow(2, nbp)));
 
 	if(mode == T0_MOD){
@@ -92,7 +91,6 @@ int main(int argc, char** argv) {
 			init(matrice_jeu,nb,personnes);
 			//récupérer un tableau de PID de threads
 			initCPU();
-			t1=clock();
 			times(&time1);
 			create_threads_personnes(personnes,nb,tid);
 			//attendre la fin des thread avant que le programme s'arrete
@@ -100,11 +98,12 @@ int main(int argc, char** argv) {
 		       		if(pthread_join(tid[i], NULL) != 0)
 					printf("bug_join\n");
 			};
-			t2=clock();
 			times(&time2);
+			int tics_per_second;
+			tics_per_second = sysconf(_SC_CLK_TCK);
 		    tab_mesures[exec] = getCurrentValue();
-		    tab_temps[exec] = (((double)t2)-((double)t1))/((double)CLOCKS_PER_SEC);
-		    tab_tempsRep[exec] = (((double)time2.tms_stime)-((double)time1.tms_stime))/((double)CLOCKS_PER_SEC);
+		    tab_temps[exec] = (((double)time2.tms_utime)-((double)time1.tms_utime))/((double)tics_per_second);
+		    tab_tempsRep[exec] = (((double)time2.tms_stime+time2.tms_utime)-((double)time1.tms_stime+time1.tms_utime))/((double)tics_per_second);
 		}
 		if(mesure){
 			bool trie = false;
@@ -138,7 +137,9 @@ int main(int argc, char** argv) {
 
     clock_t lastCPU, lastSysCPU, lastUserCPU;
     int numProcessors;
-
+	/**
+	 * [initCPU description]
+	 */
     void initCPU(){
         struct tms timeSample;
         char line[128];
@@ -148,7 +149,10 @@ int main(int argc, char** argv) {
         lastUserCPU = timeSample.tms_utime;
         numProcessors = sysconf(_SC_NPROCESSORS_ONLN);
     }
-
+	/**
+	 * [getCurrentValue description]
+	 * @return [description]
+	 */
     long double getCurrentValue(){
         struct tms timeSample;
         clock_t now;
