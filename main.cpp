@@ -18,8 +18,7 @@
 #include "sys/vtimes.h"
 #include <sys/resource.h>
 
-void initCPU();
-long double getCurrentValue();
+
 
 #define UNDEFINED_MOD -1
 #define T0_MOD 0
@@ -93,7 +92,6 @@ int main(int argc, char** argv) {
 		//récupérer un tableau de personnes
 			init(matrice_jeu, nb, personnes);
 			//récupérer un tableau de PID de threads
-			initCPU();
 			times(&time1);
 			create_threads_personnes(tid, nb, personnes);
 			//attendre la fin des thread avant que le programme s'arrete
@@ -104,7 +102,6 @@ int main(int argc, char** argv) {
 			times(&time2);
 			int tics_per_second;
 			tics_per_second = sysconf(_SC_CLK_TCK);
-		    tab_mesures[exec] = getCurrentValue();
 		    tab_temps[exec] = (((double)time2.tms_utime)-((double)time1.tms_utime))/((double)tics_per_second);
 		    tab_tempsRep[exec] = (((double)time2.tms_stime+time2.tms_utime)-((double)time1.tms_stime+time1.tms_utime))/((double)tics_per_second);
 		}
@@ -128,7 +125,7 @@ int main(int argc, char** argv) {
 				}
 				taille--;
 			}
-			std::cout << "MESURES MOYENNES : \n\t temps CPU consommé: " << (tab_temps[1]+tab_temps[2]+tab_temps[3])/((long)3)*1000 << " MiliSec  \n\t temps de réponse: "<< (tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/((long)3)*1000 <<  " MiliSec \n\t" << " CPU " << (tab_mesures[1]+tab_mesures[2]+tab_mesures[3])/((long double)3) << "%" << std::endl;
+			std::cout << "MESURES MOYENNES : \n\t temps CPU consommé: " << (tab_temps[1]+tab_temps[2]+tab_temps[3])/((long)3)*1000 << " MiliSec  \n\t temps de réponse: "<< (tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/((long)3)*1000 <<  " MiliSec " << std::endl;
 		}
 	}
 	else if(mode == T1_MOD){
@@ -137,44 +134,3 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-    clock_t lastCPU, lastSysCPU, lastUserCPU;
-    int numProcessors;
-	/**
-	 * [initCPU description]
-	 */
-    void initCPU(){
-        struct tms timeSample;
-        char line[128];
-
-        lastCPU = times(&timeSample);
-        lastSysCPU = timeSample.tms_stime;
-        lastUserCPU = timeSample.tms_utime;
-        numProcessors = sysconf(_SC_NPROCESSORS_ONLN);
-    }
-	/**
-	 * [getCurrentValue description]
-	 * @return [description]
-	 */
-    long double getCurrentValue(){
-        struct tms timeSample;
-        clock_t now;
-        long double percent;
-
-        now = times(&timeSample);
-        if (now <= lastCPU || timeSample.tms_stime < lastSysCPU ||
-            timeSample.tms_utime < lastUserCPU){
-            //Overflow detection. Just skip this value.
-            percent = 0.0;
-        }
-        else{
-            percent = (timeSample.tms_stime - lastSysCPU) +
-                (timeSample.tms_utime - lastUserCPU);
-            percent /= (now - lastCPU);
-            percent /= numProcessors;
-            percent *= 100;
-        }
-
-
-        return percent;
-    }
