@@ -9,7 +9,10 @@
 
 #include "define.h"
 #include "matrice.h"
+#include "personne.h"
 #include <time.h>
+
+#include <vector>
 
 #include "sys/times.h"
 #include "sys/vtimes.h"
@@ -63,7 +66,7 @@ int main(int argc, char** argv) {
 	}
 
 	pthread_t* tid = static_cast<pthread_t*> (malloc(sizeof(pthread_t)*(int)pow(2, nbp)));
-	Per* personnes = static_cast<Per*> (malloc(sizeof(Per)*(int)pow(2, nbp)));
+	std::vector<Personne>* personnes = new std::vector<Personne>();
 
 	if(mode == T0_MOD){
 		//création de la matrice du jeu (lignes)
@@ -84,15 +87,15 @@ int main(int argc, char** argv) {
 		double tab_temps[5] = {};
 		double tab_tempsRep[5] = {};
 
-		int nb = (int)pow(2, nbp);
+		int nb = (static_cast<int>(pow(2, nbp)));
 		int it = (mesure) ? 5 : 1;
 		for(int exec = 0; exec < it; exec++){
 		//récupérer un tableau de personnes
-			init(matrice_jeu,nb,personnes);
+			init(matrice_jeu, nb, personnes);
 			//récupérer un tableau de PID de threads
 			initCPU();
 			times(&time1);
-			create_threads_personnes(personnes,nb,tid);
+			create_threads_personnes(tid, nb, personnes);
 			//attendre la fin des thread avant que le programme s'arrete
 			for (int i = 0; i < nb; i++){
 		       		if(pthread_join(tid[i], NULL) != 0)
@@ -171,7 +174,7 @@ int main(int argc, char** argv) {
             percent /= numProcessors;
             percent *= 100;
         }
-        
+
 
         return percent;
     }

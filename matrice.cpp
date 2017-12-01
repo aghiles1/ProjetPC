@@ -1,4 +1,5 @@
 #include "matrice.h"
+#include "personne.h"
 #include "define.h"
 #include <math.h>
 #include <cstdlib>
@@ -6,8 +7,8 @@
 pthread_mutex_t lock;
 int** matrice_jeu1;
 
-void init(int** matrice_jeu,int p,Per* personnes){
-		
+void init(int** matrice_jeu, int p, std::vector<Personne>* personnes){
+
 		for (int i = 40, i1 = 80, i2=10, i3=50, i4=35; i <= 60 || i1 <= 110 || i2<=30 || i3<=90 || i4<=45 ; i++,i1++,i2++,i3++,i4++)
 		{
 			for (int j = 20, j1= 85, j2=180, j3=220,j4=300; j <= 60 || j1 <= 90 || j2<=190 || j3<=250 || j4<=450; j++,j1++,j2++,j3++,j4++)
@@ -29,24 +30,21 @@ void init(int** matrice_jeu,int p,Per* personnes){
 					*(*(matrice_jeu+i4)+j4) = WALL;
 				}
 			}
-			
+
 		}
-		int x=0;
-		while (x < p)
-		{	if (personnes[x] == nullptr)
-			{
-				personnes[x] = new Personne();
+		int i=0;
+		while (i < p)
+		{
+			int x = rand() % (HEIGHT), y = rand() % (WIDTH);
+
+			//std::cout << "pos = "<<x<<" x== "<<personnes[x]->x  <<" y== "<<personnes[x]->y << std::endl;
+			if(matrice_jeu[x][y] == EMPTY){
+				matrice_jeu[x][y] = MEN;
+				personnes->push_back(Personne(x, y));
+				i++;
 			}
-			personnes[x]->x = rand() % (HEIGHT);
-			personnes[x]->y = rand() % (WIDTH);
-			//std::cout << "pos = "<<x<<" x== "<<personnes[x]->x  <<" y== "<<personnes[x]->y << std::endl;	
-			if(*(*(matrice_jeu+personnes[x]->x)+personnes[x]->y) == EMPTY){
-				*(*(matrice_jeu+personnes[x]->x)+personnes[x]->y) = MEN;
-				x++;
-			}	
-			
 		}
-		matrice_jeu1 =matrice_jeu; 
+		matrice_jeu1 =matrice_jeu;
 }
 
 void affiche(int** matrice_jeu,int hight,int width){
@@ -62,14 +60,14 @@ void affiche(int** matrice_jeu,int hight,int width){
 }
 
 void *deplacer(void* p){
-	Per* personne = static_cast<Per*> (p);
-    int x =(*personne)->x;
-    int y =(*personne)->y;
+	Personne& personne = *(static_cast<Personne*> (p));
+    int x =personne.x;
+    int y =personne.y;
 	double dist;
 	double sinA;
     while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
-         x =(*personne)->x;
-         y =(*personne)->y;
+         x =personne.x;
+         y =personne.y;
 
 	dist = sqrt(x+y);
 	sinA = (static_cast<double>(y))/dist;
@@ -81,32 +79,32 @@ void *deplacer(void* p){
 			if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--; 
-				(*personne)->x--; 
+				personne.y--;
+				personne.x--;
 			}
 			else if(sinA<sin(M_PI/(4.0))){
 				if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 					matrice_jeu1[x-1][y]=MEN;
 					matrice_jeu1[x][y]=EMPTY;
-					(*personne)->x--; 
-			
+					personne.x--;
+
 				}
 				else if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
 					matrice_jeu1[x][y-1]=MEN;
 					matrice_jeu1[x][y]=EMPTY;
-					(*personne)->y--;  
+					personne.y--;
 				}
 			}
 			else {
 				if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
 					matrice_jeu1[x][y-1]=MEN;
 					matrice_jeu1[x][y]=EMPTY;
-					(*personne)->y--;  
+					personne.y--;
 				}
 				else if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 					matrice_jeu1[x-1][y]=MEN;
 					matrice_jeu1[x][y]=EMPTY;
-					(*personne)->x--; 
+					personne.x--;
 				}
 			}
 		}
@@ -114,47 +112,47 @@ void *deplacer(void* p){
 			if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 				matrice_jeu1[x-1][y]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->x--; 
-			
+				personne.x--;
+
 			}
 			else if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--; 
-				(*personne)->x--; 
+				personne.y--;
+				personne.x--;
 			}
 			else if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
 				matrice_jeu1[x][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--;  
+				personne.y--;
 			}
 		}
 		else{
 			if(y>0 && matrice_jeu1[x][y-1]==EMPTY){
 				matrice_jeu1[x][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--; 
-			
-			
+				personne.y--;
+
+
 			}
 			else if(x>0 && y>0 && matrice_jeu1[x-1][y-1]==EMPTY){
 				matrice_jeu1[x-1][y-1]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->y--; 
-				(*personne)->x--; 
+				personne.y--;
+				personne.x--;
 			}
 			else if(x>0 && matrice_jeu1[x-1][y]==EMPTY){
 				matrice_jeu1[x-1][y]=MEN;
 				matrice_jeu1[x][y]=EMPTY;
-				(*personne)->x--;  
+				personne.x--;
 			}
 		}
         	//on déverrouille le mutex pour que les autres threads puissent deplacer les autres personnes
         pthread_mutex_unlock(&lock);
 
     }
-    if(matrice_jeu1[((*personne)->x)][((*personne)->y)] == MEN)
-    	matrice_jeu1[((*personne)->x)][((*personne)->y)]=EMPTY;//la personne sort de la matrice
+    if(matrice_jeu1[personne.x][personne.y] == MEN)
+    	matrice_jeu1[personne.x][personne.y]=EMPTY;//la personne sort de la matrice
 // pthread_mutex_lock(&lock);
 // affiche(matrice_jeu1,128,512);
 // pthread_mutex_unlock(&lock);
@@ -162,10 +160,9 @@ void *deplacer(void* p){
 }
 
 
-
-void create_threads_personnes(Per* tab,int nb,pthread_t* personnes){
+void create_threads_personnes(pthread_t* tab, int nb, std::vector<Personne>* personnes){
 	//création d'un tableau pour les pid des threads
-	if(personnes == NULL){
+	if(tab == NULL){
 		std::cerr << "ERREUR CREATION THREADS" << std::endl;
 		exit(1);
 	}
@@ -176,9 +173,9 @@ void create_threads_personnes(Per* tab,int nb,pthread_t* personnes){
     }
     //création des threads pour chaque personne
 	for(int i=0; i<nb; i++){
-		int p= pthread_create(&personnes[i], NULL, deplacer, &(tab[i]));
+		int p= pthread_create(&tab[i], NULL, deplacer, &(personnes->at(i)));
 		if(p == EPERM || p== EAGAIN || p==EINVAL)
 			printf("bug_create\n");
 	}
-	
+
 }

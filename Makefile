@@ -16,7 +16,7 @@ SOURCES = main.cpp matrice.cpp
 INC_PATHS= -I
 
 #extra libs used in the project (for instance -lpthread)
-LIBS	= -L 
+LIBS	= -L
 
 
 LINKOBJ	= $(SOURCES:.cpp=.o)
@@ -27,6 +27,9 @@ $(EXE_NAME): $(LINKOBJ)
 	$(LINKER) $(LINKOBJ) $(INC_PATHS) $(LIBS) -o $(EXE_NAME) $(FLAGS)
 
 %.o: %.cpp %.h define.h
+	$(COMPILER) -g -c $< -o $@ $(INC_PATHS) $(FLAGS)
+
+%.o: %.cpp define.h
 	$(COMPILER) -g -c $< -o $@ $(INC_PATHS) $(FLAGS)
 
 # cleanup
