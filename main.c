@@ -13,6 +13,8 @@
 #define T0_MOD 0
 #define T1_MOD 1
 
+void affiche(t_case***);
+
 int main(int argc, char** argv) {
 
 	int nbp = -1, mode = UNDEFINED_MOD;
@@ -74,12 +76,13 @@ int main(int argc, char** argv) {
 			}
 		//récupérer un tableau de personnes
 			init(matrice, nb, personnes);
-			//récupérer un tableau de PID de threads
+			affiche(matrice);
+						//récupérer un tableau de PID de threads
 			create_threads_personnes(tab_threads, nb, personnes);
 			//attendre la fin des thread avant que le programme s'arrete
 			for (int i = 0; i < nb; i++)
 		    pthread_join(tab_threads[i], NULL);
-
+				affiche(matrice);
 			for (int i = 0; i < HEIGHT; ++i){
 				for (int j = 0; j < WIDTH; ++j){
 					free_case(matrice[i][j]);
@@ -94,4 +97,16 @@ int main(int argc, char** argv) {
 	}
 
 	return 0;
+}
+
+
+void affiche(t_case*** m){
+	for (int i = 0; i < HEIGHT; i++) {
+		for (int j = 0; j < WIDTH; j++) {
+				printf("%d",CASE_STATE(m[i][j]));
+		}
+		printf("\n");
+	}
+	printf("\n\n");
+	fflush(stdout);
 }
