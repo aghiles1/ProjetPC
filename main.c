@@ -124,9 +124,9 @@ void do_tun(int mesure, int nb){
 	//récupérer un tableau de personnes
 		init_matrice_personnes(matrice, nb, personnes);
 		//récupérer un tableau de PID de threads
-		create_threads_personnes(tab_threads, nb, personnes);
+		//TODO create_threads_personnes(tab_threads, nb, personnes);
 		//attendre la fin des thread avant que le programme s'arrete
-		for (int i = 0; i < nb; i++)
+		for (int i = 0; i < DIVISION; i++)
 			pthread_join(tab_threads[i], NULL);
 
 		for (int i = 0; i < HEIGHT; ++i)

@@ -62,132 +62,169 @@ void affiche(t_case*** m){
 
 void* deplacer(void* p){
 	personne* per = (personne*)p;
-	int x =per->x;
-	int y =per->y;
+	int x = per->x;
+	int y = per->y;
 	double dist;
 	double sinA;
 	while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
-		x =per->x;
-		y =per->y;
-
 		dist = sqrt(x+y);
 		sinA = ((double)(y))/dist;
 
 		// azimuth
 		if(sinA>=sin(M_PI/(8.0)) && sinA<=sin((3*M_PI)/(8.0))){
-			if(x>0 && y>0 && CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(x>0 && y>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				CASE_STATE(per->matrice[x-1][y-1])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				per->y--;
-				per->x--;
-			}
-			else if(sinA<sin(M_PI/(4.0))){
-				if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
+				if(CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
 					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
-					pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y]));
-					CASE_STATE(per->matrice[x-1][y])=MEN;
+					CASE_STATE(per->matrice[x-1][y-1])=MEN;
 					CASE_STATE(per->matrice[x][y])=EMPTY;
 					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
-					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
-					per->x--;
-
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
+					x = --per->x;
+					y = --per->y;
+					continue;
 				}
-				else if(y>0 && CASE_STATE(per->matrice[x][y-1])==EMPTY){
-					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
+			}
+			if(sinA<sin(M_PI/(4.0))){
+				if(x>0) {
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y]));
+					if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
+						pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+						CASE_STATE(per->matrice[x-1][y])=MEN;
+						CASE_STATE(per->matrice[x][y])=EMPTY;
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
+						x = --per->x;
+						continue;
+					}
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
+				}
+				if(y>0) {
 					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y-1]));
-					CASE_STATE(per->matrice[x][y-1])=MEN;
-					CASE_STATE(per->matrice[x][y])=EMPTY;
-					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					if(CASE_STATE(per->matrice[x][y-1])==EMPTY){
+						pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+						CASE_STATE(per->matrice[x][y-1])=MEN;
+						CASE_STATE(per->matrice[x][y])=EMPTY;
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
+						y = --per->y;
+						continue;
+					}
 					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
-					per->y--;
 				}
 			}
 			else {
-				if(y>0 && CASE_STATE(per->matrice[x][y-1])==EMPTY){
-					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+				if(y>0) {
 					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y-1]));
-					CASE_STATE(per->matrice[x][y-1])=MEN;
-					CASE_STATE(per->matrice[x][y])=EMPTY;
-					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					if(CASE_STATE(per->matrice[x][y-1])==EMPTY){
+						pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+						CASE_STATE(per->matrice[x][y-1])=MEN;
+						CASE_STATE(per->matrice[x][y])=EMPTY;
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
+						y = --per->y;
+						continue;
+					}
 					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
-					per->y--;
 				}
-				else if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
-					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+				if(x>0) {
 					pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y]));
-					CASE_STATE(per->matrice[x-1][y])=MEN;
-					CASE_STATE(per->matrice[x][y])=EMPTY;
-					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
+						pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+						CASE_STATE(per->matrice[x-1][y])=MEN;
+						CASE_STATE(per->matrice[x][y])=EMPTY;
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+						pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
+						x = --per->x;
+						continue;
+					}
 					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
-					per->x--;
-
 				}
 			}
 		}
 		else if(sinA<sin(M_PI/(8.0))){
-			if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(x>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y]));
-				CASE_STATE(per->matrice[x-1][y])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x-1][y])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
+					x = --per->x;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
-				per->x--;
-
 			}
-			else if(x>0 && y>0 && CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(x>0 && y>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				CASE_STATE(per->matrice[x-1][y-1])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x-1][y-1])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
+					x = --per->x;
+					y = --per->y;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				per->y--;
-				per->x--;
 			}
-			else if(y>0 && CASE_STATE(per->matrice[x][y-1])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(y>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y-1]));
-				CASE_STATE(per->matrice[x][y-1])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(CASE_STATE(per->matrice[x][y-1])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x][y-1])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
+					y = --per->y;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
-				per->y--;
 			}
 		}
 		else{
-			if(y>0 && CASE_STATE(per->matrice[x][y-1])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(y>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y-1]));
-				CASE_STATE(per->matrice[x][y-1])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(CASE_STATE(per->matrice[x][y-1])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x][y-1])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
+					y = --per->y;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y-1]));
-				per->y--;
 			}
-			else if(x>0 && y>0 && CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(x>0 && y>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				CASE_STATE(per->matrice[x-1][y-1])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(CASE_STATE(per->matrice[x-1][y-1])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x-1][y-1])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
+					x = --per->x;
+					y = --per->y;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y-1]));
-				per->y--;
-				per->x--;
 			}
-			else if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
-				pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+			if(x>0) {
 				pthread_mutex_lock(&CASE_VERROU(per->matrice[x-1][y]));
-				CASE_STATE(per->matrice[x-1][y])=MEN;
-				CASE_STATE(per->matrice[x][y])=EMPTY;
-				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+				if(x>0 && CASE_STATE(per->matrice[x-1][y])==EMPTY){
+					pthread_mutex_lock(&CASE_VERROU(per->matrice[x][y]));
+					CASE_STATE(per->matrice[x-1][y])=MEN;
+					CASE_STATE(per->matrice[x][y])=EMPTY;
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x][y]));
+					pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
+					x = --per->x;
+					continue;
+				}
 				pthread_mutex_unlock(&CASE_VERROU(per->matrice[x-1][y]));
-				per->x--;
-
 			}
 		}
 	}
