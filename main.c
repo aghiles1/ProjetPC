@@ -5,13 +5,15 @@
 #include <malloc.h>
 
 #include "define.h"
-#include "matrice.h"
+#include "util.h"
 #include "personne.h"
 #include "case.h"
 
 #define UNDEFINED_MOD -1
 #define T0_MOD 0
 #define T1_MOD 1
+
+void do_tzero(int mesure, int nb, pthread_t* tab_threads, personne* personnes);
 
 int main(int argc, char** argv) {
 
@@ -59,39 +61,38 @@ int main(int argc, char** argv) {
 	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
 
 	if(mode == T0_MOD){
-		//création de la matrice du jeu (lignes)
-		t_case*** matrice = (t_case***) malloc(sizeof(t_case**)*HEIGHT);
-		for (int i = 0; i < HEIGHT; ++i){
-			matrice[i] = (t_case**) malloc(sizeof(t_case*)*WIDTH);
-		}
-
-		int it = (mesure) ? 5 : 1;
-		for(int exec = 0; exec < it; exec++){
-			for (int i = 0; i < HEIGHT; ++i){
-				for (int j = 0; j < WIDTH; ++j){
-					matrice[i][j] = create_case(1);
-				}
-			}
-		//récupérer un tableau de personnes
-			init_matrice_personnes(matrice, nb, personnes);
-			//récupérer un tableau de PID de threads
-			create_threads_personnes(tab_threads, nb, personnes);
-			//attendre la fin des thread avant que le programme s'arrete
-			for (int i = 0; i < nb; i++)
-		    pthread_join(tab_threads[i], NULL);
-
-			for (int i = 0; i < HEIGHT; ++i){
-				for (int j = 0; j < WIDTH; ++j){
-					free_case(matrice[i][j]);
-					matrice[i][j] = create_case(1);
-				}
-			}
-
-		}
+		do_tzero(mesure, nb, tab_threads, personnes);
 	}
 	else if(mode == T1_MOD){
 		printf("Fonction non implémentée...\n");
 	}
 
 	return 0;
+}
+
+
+void do_tzero(int mesure, int nb, pthread_t* tab_threads, personne* personnes){
+	//création de la matrice du jeu (lignes)
+	t_case*** matrice = (t_case***) malloc(sizeof(t_case**)*HEIGHT);
+	for (int i = 0; i < HEIGHT; ++i){
+		matrice[i] = (t_case**) malloc(sizeof(t_case*)*WIDTH);
+	}
+
+	int it = (mesure==1) ? 5 : 1;
+	for(int exec = 0; exec < it; exec++){
+		for (int i = 0; i < HEIGHT; ++i)
+			for (int j = 0; j < WIDTH; ++j)
+				matrice[i][j] = create_case(1);
+	//récupérer un tableau de personnes
+		init_matrice_personnes(matrice, nb, personnes);
+		//récupérer un tableau de PID de threads
+		create_threads_personnes(tab_threads, nb, personnes);
+		//attendre la fin des thread avant que le programme s'arrete
+		for (int i = 0; i < nb; i++)
+			pthread_join(tab_threads[i], NULL);
+
+		for (int i = 0; i < HEIGHT; ++i)
+			for (int j = 0; j < WIDTH; ++j)
+				free_case(matrice[i][j]);
+	}
 }
