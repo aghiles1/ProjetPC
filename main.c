@@ -8,8 +8,7 @@
 #include "util.h"
 #include "personne.h"
 #include "case.h"
-
-#define DIVISION 4
+#include "portion.h"
 
 #define UNDEFINED_MOD -1
 #define T0_MOD 0
@@ -87,9 +86,9 @@ void do_tzero(int mesure, int nb){
 	for(int exec = 0; exec < it; exec++){
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
-				matrice[i][j] = create_case(1);
+				matrice[i][j] = create_case();
 	//récupérer un tableau de personnes
-		init_matrice_personnes(matrice, nb, personnes);
+		init_matrice_personnes(matrice, nb, personnes, NULL);
 		//récupérer un tableau de PID de threads
 		create_threads_personnes(tab_threads, nb, personnes);
 		//attendre la fin des thread avant que le programme s'arrete
@@ -107,8 +106,9 @@ void do_tun(int mesure, int nb){
 	printf("Fonction non implémentée...\n");
 	return;
 
-	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*DIVISION);
+	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*4);
 	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
+	t_portion** portions = (t_portion**) malloc(sizeof(t_portion*)*4);
 
 	//création de la matrice du jeu (lignes)
 	t_case*** matrice = (t_case***) malloc(sizeof(t_case**)*HEIGHT);
@@ -120,17 +120,27 @@ void do_tun(int mesure, int nb){
 	for(int exec = 0; exec < it; exec++){
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
-				matrice[i][j] = create_case(0);
-	//récupérer un tableau de personnes
-		init_matrice_personnes(matrice, nb, personnes);
+				matrice[i][j] = create_case();
+
+		portions[0] = create_portion(0, 63, 0, 255, nb);
+		portions[1] = create_portion(64, 127, 0, 255, nb);
+		portions[2] = create_portion(0, 63, 256, 511, nb);
+		portions[3] = create_portion(64, 127, 256, 511, nb);
+		//récupérer un tableau de personnes
+		init_matrice_personnes(matrice, nb, personnes, portions);
 		//récupérer un tableau de PID de threads
 		//TODO create_threads_personnes(tab_threads, nb, personnes);
 		//attendre la fin des thread avant que le programme s'arrete
-		for (int i = 0; i < DIVISION; i++)
+		for (int i = 0; i < 4; i++)
 			pthread_join(tab_threads[i], NULL);
 
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
 				free_case(matrice[i][j]);
+
+		free_portion(portions[0]);
+		free_portion(portions[1]);
+		free_portion(portions[2]);
+		free_portion(portions[3]);
 	}
 }

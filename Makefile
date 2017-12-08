@@ -9,7 +9,7 @@ FLAGS =-g -ansi -Wall -Wextra -D_DEBUG_ -std=c99 -lpthread -lm
 EXE_NAME= main.exe
 
 #can have several ones separated by spaces, only cpp files
-SOURCES = main.cpp util.cpp case.cpp personne.cpp
+SOURCES = main.c util.c case.c personne.c portion.c
 
 
 #PATH to extra header used in the project (when using libs not installed in the OS)
@@ -19,8 +19,8 @@ INC_PATHS= -I
 LIBS	= -L
 
 
-LINKOBJ	= $(SOURCES:.cpp=.o)
-SOURCEHEADERS = $(SOURCES:.cpp=.h)
+LINKOBJ	= $(SOURCES:.c=.o)
+SOURCEHEADERS = $(SOURCES:.c=.h)
 
 
 $(EXE_NAME): $(LINKOBJ)

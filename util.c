@@ -6,7 +6,7 @@
 
 #define M_PI (3.14159265358979323846264338327950288)
 
-void init_matrice_personnes(t_case*** matrice, int p, personne* personnes){
+void init_matrice_personnes(t_case*** matrice, int p, personne* personnes, t_portion** portions){
 
 	for (int i = 40, i1 = 80, i2=10, i3=50, i4=35; i <= 60 || i1 <= 110 || i2<=30 || i3<=90 || i4<=45 ; i++,i1++,i2++,i3++,i4++)
 	{
@@ -36,14 +36,25 @@ void init_matrice_personnes(t_case*** matrice, int p, personne* personnes){
 	{
 		int x = rand() % (HEIGHT), y = rand() % (WIDTH);
 
-		//std::cout << "pos = "<<x<<" x== "<<personnes[x]->x  <<" y== "<<personnes[x]->y << std::endl;
 		if(CASE_STATE(matrice[x][y]) == EMPTY){
 			CASE_STATE(matrice[x][y]) = MEN;
 			personnes[i].x = x;
 			personnes[i].y = y;
 			personnes[i].matrice = matrice;
+			if(portions!=NULL){
+				if(x>=0 && x<=63 && y>=0 && y<=255) { portions[0]->personnes[i] = &personnes[i]; portions[0]->nb_personnes++; }
+				else if(x>=64 && x<=127 && y>=0 && y<=255) { portions[1]->personnes[i] = &personnes[i]; portions[1]->nb_personnes++; }
+				else if(x>=0 && x<=63 && y>=256 && y<=511) { portions[2]->personnes[i] = &personnes[i]; portions[2]->nb_personnes++; }
+				else if(x>=64 && x<=127 && y>=256 && y<=511) { portions[3]->personnes[i] = &personnes[i]; portions[3]->nb_personnes++; }
+			}
 			i++;
 		}
+	}
+	if(portions!=NULL){
+		portions[0]->matrice = matrice;
+		portions[1]->matrice = matrice;
+		portions[2]->matrice = matrice;
+		portions[3]->matrice = matrice;
 	}
 }
 
@@ -60,7 +71,7 @@ void affiche(t_case*** m){
 }
 
 
-void* deplacer(void* p){
+void* deplacer_zero(void* p){
 	personne* per = (personne*)p;
 	int x = per->x;
 	int y = per->y;
@@ -236,8 +247,20 @@ void* deplacer(void* p){
 	return NULL;
 }
 
+void* deplacer_un(void* p){
+	t_portion* por = (t_portion*)p;
+
+	return NULL;
+}
+
 void create_threads_personnes(pthread_t* tab, int nb, personne* personnes){
 	//création des threads pour chaque personne
 	for(int i=0; i<nb; i++)
-	pthread_create(&(tab[i]), NULL, deplacer, (void*)&(personnes[i]));
+		pthread_create(&(tab[i]), NULL, deplacer_zero, (void*)&(personnes[i]));
+}
+
+void create_threads_portions(pthread_t* tab, t_portion** portions){
+	//création des threads pour chaque personne
+	for(int i=0; i<4; i++)
+		pthread_create(&(tab[i]), NULL, deplacer_un, (void*)&(portions[i]));
 }

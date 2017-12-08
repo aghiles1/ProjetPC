@@ -18,7 +18,7 @@ struct s_case {
 #define CASE_STATE(c)        ((c)->state)
 #define CASE_VERROU(c)       ((c)->verrou)
 
-t_case* create_case(int boolean_verrou);
+t_case* create_case();
 
 void free_case(t_case* c);
 
