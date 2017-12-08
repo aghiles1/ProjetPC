@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 				}
 			}
 		//récupérer un tableau de personnes
-			init(matrice, nb, personnes);
+			init_matrice_personnes(matrice, nb, personnes);
 			//récupérer un tableau de PID de threads
 			create_threads_personnes(tab_threads, nb, personnes);
 			//attendre la fin des thread avant que le programme s'arrete

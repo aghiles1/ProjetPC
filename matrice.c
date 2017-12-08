@@ -3,9 +3,10 @@
 #include "define.h"
 #include "case.h"
 #include <math.h>
+
 #define M_PI (3.14159265358979323846264338327950288)
 
-void init(t_case*** matrice, int p, personne* personnes){
+void init_matrice_personnes(t_case*** matrice, int p, personne* personnes){
 
 		for (int i = 40, i1 = 80, i2=10, i3=50, i4=35; i <= 60 || i1 <= 110 || i2<=30 || i3<=90 || i4<=45 ; i++,i1++,i2++,i3++,i4++)
 		{
