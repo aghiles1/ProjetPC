@@ -9,11 +9,15 @@
 #include "personne.h"
 #include "case.h"
 
+#define DIVISION 4
+
 #define UNDEFINED_MOD -1
 #define T0_MOD 0
 #define T1_MOD 1
 
-void do_tzero(int mesure, int nb, pthread_t* tab_threads, personne* personnes);
+void do_tzero(int mesure, int nb);
+
+void do_tun(int mesure, int nb);
 
 int main(int argc, char** argv) {
 
@@ -57,21 +61,22 @@ int main(int argc, char** argv) {
 	}
 
   int nb = (int)pow(2, nbp);
-	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*nb);
-	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
 
 	if(mode == T0_MOD){
-		do_tzero(mesure, nb, tab_threads, personnes);
+		do_tzero(mesure, nb);
 	}
 	else if(mode == T1_MOD){
-		printf("Fonction non implémentée...\n");
+		do_tun(mesure, nb);
 	}
 
 	return 0;
 }
 
 
-void do_tzero(int mesure, int nb, pthread_t* tab_threads, personne* personnes){
+void do_tzero(int mesure, int nb){
+	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*nb);
+	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
+
 	//création de la matrice du jeu (lignes)
 	t_case*** matrice = (t_case***) malloc(sizeof(t_case**)*HEIGHT);
 	for (int i = 0; i < HEIGHT; ++i){
@@ -83,6 +88,39 @@ void do_tzero(int mesure, int nb, pthread_t* tab_threads, personne* personnes){
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
 				matrice[i][j] = create_case(1);
+	//récupérer un tableau de personnes
+		init_matrice_personnes(matrice, nb, personnes);
+		//récupérer un tableau de PID de threads
+		create_threads_personnes(tab_threads, nb, personnes);
+		//attendre la fin des thread avant que le programme s'arrete
+		for (int i = 0; i < nb; i++)
+			pthread_join(tab_threads[i], NULL);
+
+		for (int i = 0; i < HEIGHT; ++i)
+			for (int j = 0; j < WIDTH; ++j)
+				free_case(matrice[i][j]);
+	}
+}
+
+
+void do_tun(int mesure, int nb){
+	printf("Fonction non implémentée...\n");
+	return;
+
+	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*DIVISION);
+	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
+
+	//création de la matrice du jeu (lignes)
+	t_case*** matrice = (t_case***) malloc(sizeof(t_case**)*HEIGHT);
+	for (int i = 0; i < HEIGHT; ++i){
+		matrice[i] = (t_case**) malloc(sizeof(t_case*)*WIDTH);
+	}
+
+	int it = (mesure==1) ? 5 : 1;
+	for(int exec = 0; exec < it; exec++){
+		for (int i = 0; i < HEIGHT; ++i)
+			for (int j = 0; j < WIDTH; ++j)
+				matrice[i][j] = create_case(0);
 	//récupérer un tableau de personnes
 		init_matrice_personnes(matrice, nb, personnes);
 		//récupérer un tableau de PID de threads
