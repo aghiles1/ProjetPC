@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include <SDL/SDL.h>
+#include <X11/Xlib.h>
+
 #include "personne.h"
 #include "case.h"
 #include "portion.h"
@@ -20,5 +23,11 @@ void affiche(t_case***);
 void* deplacer_zero(void* p);
 
 void* deplacer_un(void* p);
+
+void init_sdl(void);
+
+void remplir(int,int,SDL_Surface*,Uint32);
+
+void remplir1(int,int,SDL_Surface*,Uint32);
 
 #endif

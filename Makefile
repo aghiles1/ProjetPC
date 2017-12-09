@@ -4,7 +4,7 @@ COMPILER = gcc
 LINKER =gcc
 
 #options for linker and compiler
-FLAGS =-g -ansi -Wall -Wextra -D_DEBUG_ -std=c99 -lpthread -lm
+FLAGS =-g -ansi -Wall -Wextra -D_DEBUG_ -std=c99 -lpthread -lm -lX11
 
 EXE_NAME= main.exe
 
@@ -16,7 +16,7 @@ SOURCES = main.c util.c case.c personne.c portion.c
 INC_PATHS= -I
 
 #extra libs used in the project (for instance -lpthread)
-LIBS	= -L
+LIBS	= -L $(shell sdl-config --libs) -lGL -lGLU
 
 
 LINKOBJ	= $(SOURCES:.c=.o)

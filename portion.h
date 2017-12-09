@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <SDL/SDL.h>
 
 typedef struct s_portion t_portion;
 
@@ -18,6 +19,7 @@ struct s_portion {
   int ymin;
   int ymax;
   int nb_personnes;
+  Uint32 color;
   personne* personnes;
   t_case*** matrice;
 };
