@@ -103,9 +103,6 @@ void do_tzero(int mesure, int nb){
 
 
 void do_tun(int mesure, int nb){
-	printf("Fonction non implémentée...\n");
-	return;
-
 	pthread_t* tab_threads = (pthread_t*) malloc(sizeof(pthread_t)*4);
 	personne* personnes = (personne*) malloc(sizeof(personne)*nb);
 	t_portion** portions = (t_portion**) malloc(sizeof(t_portion*)*4);
@@ -126,10 +123,11 @@ void do_tun(int mesure, int nb){
 		portions[1] = create_portion(64, 127, 0, 255, nb);
 		portions[2] = create_portion(0, 63, 256, 511, nb);
 		portions[3] = create_portion(64, 127, 256, 511, nb);
+
 		//récupérer un tableau de personnes
 		init_matrice_personnes(matrice, nb, personnes, portions);
 		//récupérer un tableau de PID de threads
-		//TODO create_threads_personnes(tab_threads, nb, personnes);
+		create_threads_portions(tab_threads, portions);
 		//attendre la fin des thread avant que le programme s'arrete
 		for (int i = 0; i < 4; i++)
 			pthread_join(tab_threads[i], NULL);

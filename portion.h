@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include <unistd.h>
 
 typedef struct s_portion t_portion;
 
@@ -17,7 +18,7 @@ struct s_portion {
   int ymin;
   int ymax;
   int nb_personnes;
-  personne** personnes;
+  personne* personnes;
   t_case*** matrice;
 };
 
