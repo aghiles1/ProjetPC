@@ -7,7 +7,7 @@
 #define M_PI (3.14159265358979323846264338327950288)
 
 void init_matrice_personnes(t_case*** matrice, int p, personne* personnes, t_portion** portions){
-
+	srand(0);
 	for (int i = 40, i1 = 80, i2=10, i3=50, i4=35; i <= 60 || i1 <= 110 || i2<=30 || i3<=90 || i4<=45 ; i++,i1++,i2++,i3++,i4++)
 	{
 		for (int j = 20, j1= 85, j2=180, j3=220,j4=300; j <= 60 || j1 <= 90 || j2<=190 || j3<=250 || j4<=450; j++,j1++,j2++,j3++,j4++)

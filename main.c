@@ -3,7 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include <malloc.h>
-
+#include <sys/time.h>
 #include "define.h"
 #include "util.h"
 #include "personne.h"
@@ -15,9 +15,9 @@
 #define T1_MOD 1
 
 void do_tzero(int mesure, int nb);
-
+void trie(double* tab_temps,double* tab_tempsRep);
 void do_tun(int mesure, int nb);
-
+double elapsedTimeCPU, elapsedTime;
 int main(int argc, char** argv) {
 
 	int nbp = -1, mode = UNDEFINED_MOD;
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 		if(strcmp(argv[i], "-p")==0){
 			i++;
 			if(i >= argc)
-				break;
+			break;
 			nbp = atoi(argv[i]);
 			if(nbp > 9 || nbp < 0){
 				fprintf(stderr, "%s", "ERREUR PARAMETRE -p [0-9] EN DEHORS DE LA PLAGE\n");
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-  int nb = (int)pow(2, nbp);
+	int nb = (int)pow(2, nbp);
 
 	if(mode == T0_MOD){
 		do_tzero(mesure, nb);
@@ -67,7 +67,9 @@ int main(int argc, char** argv) {
 	else if(mode == T1_MOD){
 		do_tun(mesure, nb);
 	}
-
+	if (mesure) {
+		printf("MESURES MOYENNES : \n\t temps CPU consommé: %f MiliSec  \n\t temps de réponse: %f MiliSec\n", elapsedTimeCPU , elapsedTime);
+	}
 	return 0;
 }
 
@@ -83,22 +85,38 @@ void do_tzero(int mesure, int nb){
 	}
 
 	int it = (mesure==1) ? 5 : 1;
+	double tab_temps[5] = {};
+	double tab_tempsRep[5] = {};
+	struct timeval t1, t2;
+	clock_t start_t, end_t;
 	for(int exec = 0; exec < it; exec++){
 		for (int i = 0; i < HEIGHT; ++i)
-			for (int j = 0; j < WIDTH; ++j)
-				matrice[i][j] = create_case();
-	//récupérer un tableau de personnes
+		for (int j = 0; j < WIDTH; ++j)
+		matrice[i][j] = create_case();
+		//récupérer un tableau de personnes
 		init_matrice_personnes(matrice, nb, personnes, NULL);
+		//mesure de temps
+		gettimeofday(&t1, NULL);
+		//mesure de temps CPU
+		start_t = clock();
 		//récupérer un tableau de PID de threads
 		create_threads_personnes(tab_threads, nb, personnes);
 		//attendre la fin des thread avant que le programme s'arrete
 		for (int i = 0; i < nb; i++)
-			pthread_join(tab_threads[i], NULL);
-
+		pthread_join(tab_threads[i], NULL);
+		gettimeofday(&t2, NULL);
+		end_t = clock();
+		tab_temps[exec] = (1000)*((double)end_t-(double)start_t) / CLOCKS_PER_SEC;
+		tab_tempsRep[exec] = (double)(t2.tv_sec - t1.tv_sec) * 1000;
 		for (int i = 0; i < HEIGHT; ++i)
-			for (int j = 0; j < WIDTH; ++j)
-				free_case(matrice[i][j]);
+		for (int j = 0; j < WIDTH; ++j)
+		free_case(matrice[i][j]);
 	}
+	if (mesure) {
+		trie(tab_temps, tab_tempsRep);
+	}
+	elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/(double)(3);
+	elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/(double)(3);
 }
 
 
@@ -114,10 +132,14 @@ void do_tun(int mesure, int nb){
 	}
 
 	int it = (mesure==1) ? 5 : 1;
+	double tab_temps[5] = {};
+	double tab_tempsRep[5] = {};
+	struct timeval t1, t2;
+	clock_t start_t, end_t;
 	for(int exec = 0; exec < it; exec++){
 		for (int i = 0; i < HEIGHT; ++i)
-			for (int j = 0; j < WIDTH; ++j)
-				matrice[i][j] = create_case();
+		for (int j = 0; j < WIDTH; ++j)
+		matrice[i][j] = create_case();
 
 		portions[0] = create_portion(0, 63, 0, 255, nb);
 		portions[1] = create_portion(64, 127, 0, 255, nb);
@@ -126,19 +148,51 @@ void do_tun(int mesure, int nb){
 
 		//récupérer un tableau de personnes
 		init_matrice_personnes(matrice, nb, personnes, portions);
+		//mesure de temps
+		gettimeofday(&t1, NULL);
+		//mesure de temps CPU
+		start_t = clock();
 		//récupérer un tableau de PID de threads
 		create_threads_portions(tab_threads, portions);
 		//attendre la fin des thread avant que le programme s'arrete
 		for (int i = 0; i < 4; i++)
-			pthread_join(tab_threads[i], NULL);
-
+		pthread_join(tab_threads[i], NULL);
+		gettimeofday(&t2, NULL);
+		end_t = clock();
+		tab_temps[exec] = (1000)*((double)end_t-(double)start_t) / CLOCKS_PER_SEC;
+		tab_tempsRep[exec] = (double)(t2.tv_sec - t1.tv_sec) * 1000;
 		for (int i = 0; i < HEIGHT; ++i)
-			for (int j = 0; j < WIDTH; ++j)
-				free_case(matrice[i][j]);
+		for (int j = 0; j < WIDTH; ++j)
+		free_case(matrice[i][j]);
 
 		free_portion(portions[0]);
 		free_portion(portions[1]);
 		free_portion(portions[2]);
 		free_portion(portions[3]);
 	}
+	if (mesure) {
+		trie(tab_temps, tab_tempsRep);
+	}
+	elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/(double)(3);
+	elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/(double)(3);
+
 }
+
+	void trie(double* tab_temps, double* tab_tempsRep){
+		long double tab_mesures[5] = {};
+			for(int z=0 ; z < 4 ; z++){
+				printf("%f temps\n ", tab_temps[z]);
+				printf("%f tempsRep\n ", tab_tempsRep[z]);
+				if(tab_temps[z] > tab_temps[z+1]){
+					double tmp = tab_temps[z];
+					tab_temps[z] = tab_temps[z+1];
+					tab_temps[z+1] = tmp;
+					long double tmp2 = tab_mesures[z];
+					tab_mesures[z] = tab_mesures[z+1];
+					tab_mesures[z+1] = tmp2;
+					double tmp3 = tab_tempsRep[z];
+					tab_tempsRep[z] = tab_tempsRep[z+1];
+					tab_tempsRep[z+1] = tmp3;
+				}
+			}
+	}
