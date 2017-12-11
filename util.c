@@ -262,8 +262,10 @@ void* deplacer_un(void* p){
 	double dist;
 	double sinA;
 
+	int local_count = 0;
+
 	while(1) {
-		if(count == por->nb_personnes){
+		if(count == por->nb_personnes || local_count == por->nb_personnes){
 			break;
 		}
 
@@ -271,8 +273,16 @@ void* deplacer_un(void* p){
 
 		per = &por->personnes[current_per];
 		current_per++;
-		if(current_per==por->nb_personnes)
+		if(current_per==por->nb_personnes){
 			current_per = 0;
+			local_count = 0;
+		}
+
+		if(per->x < por->xmin || per->y < por->ymin){
+			local_count++;
+			pthread_mutex_unlock(&per->verrou);
+			continue;
+		}
 
 		if(per->x >= por->xmin && per->x <= por->xmax && per->y >= por->ymin && per->y <= por->ymax) {
 			x = per->x;
