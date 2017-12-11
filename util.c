@@ -97,7 +97,7 @@ void* deplacer_zero(void* p){
 	double dist;
 	double sinA;
 	while(!((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1))){
-		dist = sqrt(x+y);
+		dist = sqrt(x*x+y*y);
 		sinA = ((double)(y))/dist;
 
 		// azimuth
@@ -337,7 +337,7 @@ void* deplacer_un(void* p){
 				continue;
 			}
 
-			dist = sqrt(x+y);
+			dist = sqrt(x*x+y*y);
 			sinA = ((double)(y))/dist;
 
 			// azimuth
