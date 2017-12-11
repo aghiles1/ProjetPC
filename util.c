@@ -339,6 +339,7 @@ void* deplacer_un(void* p){
 			y = per->y;
 
 			if((x==0 && y==0) || (x==1 && y==0) || (x==0 && y==1)){
+				remplir(x,y,rectangle,noir);
 				CASE_STATE(per->matrice[per->x][per->y])=EMPTY;
 				per->x = -1;
 				per->y = -1;
