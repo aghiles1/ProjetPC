@@ -85,8 +85,8 @@ void do_tzero(int mesure, int nb){
 	}
 
 	int it = (mesure==1) ? 5 : 1;
-	double tab_temps[5] = {};
-	double tab_tempsRep[5] = {};
+	double* tab_temps = (double*)malloc(sizeof(double)*5);
+	double* tab_tempsRep = (double*)malloc(sizeof(double)*5);
 	struct timeval t1, t2;
 	clock_t start_t, end_t;
 	for(int exec = 0; exec < it; exec++){
@@ -106,17 +106,22 @@ void do_tzero(int mesure, int nb){
 		pthread_join(tab_threads[i], NULL);
 		gettimeofday(&t2, NULL);
 		end_t = clock();
-		tab_temps[exec] = (1000)*((double)end_t-(double)start_t) / CLOCKS_PER_SEC;
-		tab_tempsRep[exec] = (double)(t2.tv_sec - t1.tv_sec) * 1000;
+
+		tab_temps[exec] = ((double)1000)*((((double)end_t)-((double)start_t)) / CLOCKS_PER_SEC);
+		tab_tempsRep[exec] = (((double)t2.tv_usec) - ((double)t1.tv_usec))/ ((double)1000);
+
 		for (int i = 0; i < HEIGHT; ++i)
-		for (int j = 0; j < WIDTH; ++j)
-		free_case(matrice[i][j]);
+			for (int j = 0; j < WIDTH; ++j)
+				free_case(matrice[i][j]);
 	}
 	if (mesure) {
 		trie(tab_temps, tab_tempsRep);
+
+			elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/((double)3);
+			elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/((double)3);
 	}
-	elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/(double)(3);
-	elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/(double)(3);
+	free(tab_temps);
+	free(tab_tempsRep);
 }
 
 
@@ -132,10 +137,10 @@ void do_tun(int mesure, int nb){
 	}
 
 	int it = (mesure==1) ? 5 : 1;
-	double tab_temps[5] = {};
-	double tab_tempsRep[5] = {};
 	struct timeval t1, t2;
 	clock_t start_t, end_t;
+	double* tab_temps = (double*)malloc(sizeof(double)*5);
+	double* tab_tempsRep = (double*)malloc(sizeof(double)*5);
 	for(int exec = 0; exec < it; exec++){
 		for (int i = 0; i < HEIGHT; ++i)
 		for (int j = 0; j < WIDTH; ++j)
@@ -159,8 +164,9 @@ void do_tun(int mesure, int nb){
 		pthread_join(tab_threads[i], NULL);
 		gettimeofday(&t2, NULL);
 		end_t = clock();
-		tab_temps[exec] = (1000)*((double)end_t-(double)start_t) / CLOCKS_PER_SEC;
-		tab_tempsRep[exec] = (double)(t2.tv_sec - t1.tv_sec) * 1000;
+		tab_temps[exec] = ((double)1000.0)*((((double)end_t)-((double)start_t)) / CLOCKS_PER_SEC);
+		tab_tempsRep[exec] = (((double)t2.tv_usec) - ((double)t1.tv_usec))/ ((double)1000.0);
+
 		for (int i = 0; i < HEIGHT; ++i)
 		for (int j = 0; j < WIDTH; ++j)
 		free_case(matrice[i][j]);
@@ -172,27 +178,29 @@ void do_tun(int mesure, int nb){
 	}
 	if (mesure) {
 		trie(tab_temps, tab_tempsRep);
+		elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/(double)(3);
+		elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/(double)(3);
 	}
-	elapsedTimeCPU = (double)(tab_temps[1]+tab_temps[2]+tab_temps[3])/(double)(3);
-	elapsedTime =  (double)(tab_tempsRep[1]+tab_tempsRep[2]+tab_tempsRep[3])/(double)(3);
 
+	free(tab_temps);
+	free(tab_tempsRep);
 }
 
 	void trie(double* tab_temps, double* tab_tempsRep){
-		long double tab_mesures[5] = {};
-			for(int z=0 ; z < 4 ; z++){
-				printf("%f temps\n ", tab_temps[z]);
-				printf("%f tempsRep\n ", tab_tempsRep[z]);
-				if(tab_temps[z] > tab_temps[z+1]){
-					double tmp = tab_temps[z];
-					tab_temps[z] = tab_temps[z+1];
-					tab_temps[z+1] = tmp;
-					long double tmp2 = tab_mesures[z];
-					tab_mesures[z] = tab_mesures[z+1];
-					tab_mesures[z+1] = tmp2;
-					double tmp3 = tab_tempsRep[z];
-					tab_tempsRep[z] = tab_tempsRep[z+1];
-					tab_tempsRep[z+1] = tmp3;
+		int z=0 ;
+		for (int i = 0; i < 4; i++) {
+			z=i+1;
+			for(; z < 5 ; z++){
+				if(tab_temps[i] > tab_temps[z]){
+					double tmp = tab_temps[i];
+					tab_temps[i] = tab_temps[z];
+					tab_temps[z] = tmp;
 				}
-			}
+				if (tab_tempsRep[i] > tab_tempsRep[z]) {
+					double tmp3 = tab_tempsRep[i];
+					tab_tempsRep[i] = tab_tempsRep[z];
+					tab_tempsRep[z] = tmp3;
+				}
+		}
 	}
+}
