@@ -14,10 +14,27 @@
 #define T0_MOD 0
 #define T1_MOD 1
 
+/**
+ * [do_tzero est une fonction qui fait appel a d'autre fonction pour mettre en place la strategie t0]
+ * @param mesure [boolean pour dire si on fait les mesures ou non]
+ * @param nb     [le nombre de personnes dans le terrain]
+ */
 void do_tzero(int mesure, int nb);
+/**
+ * [trie est une fonction qui trie les deux tableux pour utiliser les valeurs intermidiare qui servent a calculer le temps(CPU,réponse)]
+ * @param tab_temps    [temps CPU pour chaque execution]
+ * @param tab_tempsRep [temps réponse pour chaque execution]
+ */
 void trie(double* tab_temps,double* tab_tempsRep);
+/**
+ * [do_tun est une fonction qui fait appel a d'autre fonction pour mettre en place la strategie t1]
+ * @param mesure [boolean pour dire si on fait les mesures ou non]
+ * @param nb     [le nombre de personnes dans le terrain]
+ */
 void do_tun(int mesure, int nb);
+
 double elapsedTimeCPU, elapsedTime;
+
 int main(int argc, char** argv) {
 
 	int nbp = -1, mode = UNDEFINED_MOD;
